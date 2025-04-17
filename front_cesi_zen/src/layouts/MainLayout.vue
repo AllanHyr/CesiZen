@@ -77,8 +77,8 @@ function handleAuthAction() {
 
 // Définir les liens accessibles selon l'état connecté ou pas
 const linksPublic = [
-  { title: 'Accueil', caption: 'Page principale', icon: 'home', to: '/' },
-  { title: 'Informations', caption: 'Santé mentale', icon: 'info', to: '/informations' },
+  { title: 'Accueil', caption: 'Page d\'informations', icon: 'home', to: '/' },
+  { title: 'Respiration', caption: 'Exercice de respiration', icon: 'info', to: '/respiration' },
   { title: 'Connexion', caption: 'Se connecter', icon: 'login', to: '/login' }
 ]
 
