@@ -12,10 +12,18 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          CESIZen
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-space />
+
+        <q-btn
+          flat
+          dense
+          color="primary"
+          :label="isLoggedIn ? 'Logout' : 'Login'"
+          @click="handleAuthAction"
+        />
       </q-toolbar>
     </q-header>
 
@@ -25,17 +33,25 @@
       bordered
     >
       <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
+        <q-item-label header>
+          Navigation
         </q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
+        <q-item
+          clickable
+          v-for="link in availableLinks"
           :key="link.title"
-          v-bind="link"
-        />
+          :to="link.to"
+          @click="leftDrawerOpen = false"
+        >
+          <q-item-section avatar>
+            <q-icon :name="link.icon" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ link.title }}</q-item-label>
+            <q-item-label caption>{{ link.caption }}</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -46,57 +62,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
-
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-]
+import { ref, computed } from 'vue'
 
 const leftDrawerOpen = ref(false)
+const isLoggedIn = ref(false) // Simuler l'état de connexion
 
-function toggleLeftDrawer () {
+function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
+
+function handleAuthAction() {
+  isLoggedIn.value = !isLoggedIn.value
+}
+
+// Définir les liens accessibles selon l'état connecté ou pas
+const linksPublic = [
+  { title: 'Accueil', caption: 'Page principale', icon: 'home', to: '/' },
+  { title: 'Informations', caption: 'Santé mentale', icon: 'info', to: '/informations' },
+  { title: 'Connexion', caption: 'Se connecter', icon: 'login', to: '/login' }
+]
+
+const linksPrivate = [
+  { title: 'Dashboard', caption: 'Votre espace', icon: 'dashboard', to: '/dashboard' },
+  { title: 'Tracker d\'émotions', caption: 'Suivi personnel', icon: 'favorite', to: '/tracker' },
+  { title: 'Déconnexion', caption: 'Quitter', icon: 'logout', to: '/' }
+]
+
+// Selon l'état, on change les liens visibles
+const availableLinks = computed(() => isLoggedIn.value ? linksPrivate : linksPublic)
 </script>
