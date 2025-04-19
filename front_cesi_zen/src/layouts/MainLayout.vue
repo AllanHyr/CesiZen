@@ -2,54 +2,31 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
 
-        <q-toolbar-title>
-          CESIZen
-        </q-toolbar-title>
+        <q-toolbar-title> CesiZen </q-toolbar-title>
 
         <q-space />
 
-        <q-btn
-          flat
-          dense
-          color="primary"
-          :label="isLoggedIn ? 'Logout' : 'Login'"
-          @click="handleAuthAction"
-        />
+        <div v-if="authStore.isLoggedIn" class="q-mr-md">Connecté : {{ authStore.userEmail }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header>
-          Navigation
-        </q-item-label>
+        <q-item-label header> Navigation </q-item-label>
 
         <q-item
-          clickable
           v-for="link in availableLinks"
           :key="link.title"
-          :to="link.to"
-          @click="leftDrawerOpen = false"
+          clickable
+          @click="handleLink(link)"
         >
           <q-item-section avatar>
             <q-icon :name="link.icon" />
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
-            <q-item-label caption>{{ link.caption }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -58,36 +35,94 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-dialog v-model="confirmLogout">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="logout" color="primary" text-color="white" size="md" class="q-mr-md" />
+          <span class="text-h6">Déconnexion</span>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Êtes-vous sûr de vouloir vous déconnecter ?
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Annuler" color="grey" v-close-popup />
+          <q-btn flat label="Se déconnecter" color="primary" @click="logoutConfirmed" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useAuthStore } from 'src/stores/auth' // Importe le store
 
 const leftDrawerOpen = ref(false)
-const isLoggedIn = ref(false) // Simuler l'état de connexion
+const router = useRouter()
+const $q = useQuasar()
+const confirmLogout = ref(false)
+const authStore = useAuthStore() // Utilise le store
 
+// Liens visibles si non connecté
+const publicLinks = [
+  { title: 'Accueil', icon: 'home', to: '/' },
+  { title: 'Respiration', icon: 'self_improvement', to: '/respiration' },
+  { title: 'Activités de détente', icon: 'spa', to: '/activites' },
+  { title: 'Diagnostique', icon: 'assignment', to: '/diagnostique' },
+  { title: 'Se connecter', icon: 'login', to: '/login' },
+]
+
+// Liens visibles si connecté
+const privateLinks = [
+  { title: 'Accueil', icon: 'home', to: '/' },
+  { title: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
+  { title: 'Respiration', icon: 'self_improvement', to: '/respiration' },
+  { title: 'Activités de détente', icon: 'spa', to: '/activites' },
+  { title: 'Diagnostique', icon: 'assignment', to: '/diagnostique' },
+  { title: "Tracker d'émotions", icon: 'favorite', to: '/tracker' },
+  { title: 'Se déconnecter', icon: 'logout', to: '#', action: logout }, // Utilise directement la fonction logout
+]
+
+// Liens affichés selon connexion
+const availableLinks = computed(() => (authStore.isLoggedIn ? privateLinks : publicLinks))
+
+// Gestion de clic sur un lien
+function handleLink(link) {
+  if (link.action) {
+    link.action()
+  } else {
+    router.push(link.to)
+    leftDrawerOpen.value = false
+  }
+}
+
+// Déconnexion
+function logout() {
+  authStore.logout()
+  router.push('/login')
+
+  $q.notify({
+    type: 'positive',
+    message: 'Vous avez été déconnecté avec succès !',
+    position: 'top-right',
+  })
+}
+
+// Déconnexion confirmée (si tu gardes la popup)
+function logoutConfirmed() {
+  logout() // Appelle la fonction de déconnexion du store
+  confirmLogout.value = false
+}
+
+// Ouvrir/Fermer le menu
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
-function handleAuthAction() {
-  isLoggedIn.value = !isLoggedIn.value
-}
-
-// Définir les liens accessibles selon l'état connecté ou pas
-const linksPublic = [
-  { title: 'Accueil', caption: 'Page d\'informations', icon: 'home', to: '/' },
-  { title: 'Respiration', caption: 'Exercice de respiration', icon: 'info', to: '/respiration' },
-  { title: 'Connexion', caption: 'Se connecter', icon: 'login', to: '/login' }
-]
-
-const linksPrivate = [
-  { title: 'Dashboard', caption: 'Votre espace', icon: 'dashboard', to: '/dashboard' },
-  { title: 'Tracker d\'émotions', caption: 'Suivi personnel', icon: 'favorite', to: '/tracker' },
-  { title: 'Déconnexion', caption: 'Quitter', icon: 'logout', to: '/' }
-]
-
-// Selon l'état, on change les liens visibles
-const availableLinks = computed(() => isLoggedIn.value ? linksPrivate : linksPublic)
+// Pas besoin de handleLoginSuccess ici, l'état est géré par Pinia
 </script>

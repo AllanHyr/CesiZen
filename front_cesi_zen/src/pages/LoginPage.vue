@@ -1,9 +1,9 @@
 <template>
   <q-page class="flex flex-center">
-    <div class="q-pa-md" style="max-width: 400px; width: 100%;">
+    <div class="q-pa-md" style="max-width: 400px; width: 100%">
       <q-card>
         <q-card-section>
-          <div class="text-h6">{{ modeInscription ? 'Créer un compte' : 'Connexion' }}</div>
+          <div class="text-h6">{{ isRegisterMode ? 'Créer un compte' : 'Connexion' }}</div>
         </q-card-section>
 
         <q-card-section>
@@ -13,9 +13,9 @@
 
         <q-card-actions align="around">
           <q-btn
-            :label="modeInscription ? 'Créer un compte' : 'Se connecter'"
+            :label="isRegisterMode ? 'S\'inscrire' : 'Se connecter'"
             color="primary"
-            @click="modeInscription ? register() : login()"
+            @click="isRegisterMode ? fakeRegister() : fakeLogin()"
           />
         </q-card-actions>
 
@@ -23,8 +23,10 @@
           <q-btn
             flat
             color="primary"
-            :label="modeInscription ? 'Déjà inscrit ? Se connecter' : 'Pas de compte ? Créer un compte'"
-            @click="modeInscription = !modeInscription"
+            :label="
+              isRegisterMode ? 'Déjà inscrit ? Se connecter' : 'Pas de compte ? Créer un compte'
+            "
+            @click="isRegisterMode = !isRegisterMode"
           />
         </q-card-section>
       </q-card>
@@ -35,52 +37,52 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth' // Importe le store
+
+// Simulation JSON de "base de données" locale
+const fakeUsers = ref([
+  { email: 'admin@cesizen.fr', password: 'admin123' },
+  { email: 'test@cesizen.fr', password: 'test123' },
+])
 
 const email = ref('')
 const password = ref('')
-const modeInscription = ref(false) // false = login, true = inscription
+const isRegisterMode = ref(false)
 const router = useRouter()
+const authStore = useAuthStore() // Utilise le store
 
-function login() {
+async function fakeLogin() {
   if (!email.value || !password.value) {
     alert('Veuillez remplir tous les champs.')
     return
   }
 
-  const users = JSON.parse(localStorage.getItem('users')) || []
-  const user = users.find(u => u.email === email.value && u.password === password.value)
+  // Simulation d'un appel API
+  const user = fakeUsers.value.find((u) => u.email === email.value && u.password === password.value)
 
   if (user) {
-    localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('currentUser', JSON.stringify(user))
+    authStore.login(user) // Utilise l'action du store pour la connexion
     router.push('/dashboard')
   } else {
-    alert('Identifiants invalides.')
+    alert('Email ou mot de passe incorrect.')
   }
 }
 
-function register() {
+async function fakeRegister() {
   if (!email.value || !password.value) {
     alert('Veuillez remplir tous les champs.')
     return
   }
 
-  const users = JSON.parse(localStorage.getItem('users')) || []
-  const userExists = users.find(u => u.email === email.value)
+  const userExists = fakeUsers.value.find((u) => u.email === email.value)
 
   if (userExists) {
     alert('Un compte avec cet email existe déjà.')
     return
   }
 
-  const newUser = {
-    email: email.value,
-    password: password.value
-  }
-
-  users.push(newUser)
-  localStorage.setItem('users', JSON.stringify(users))
-  alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.')
-  modeInscription.value = false
+  fakeUsers.value.push({ email: email.value, password: password.value })
+  alert('Compte créé ! Vous pouvez maintenant vous connecter.')
+  isRegisterMode.value = false
 }
 </script>
