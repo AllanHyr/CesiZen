@@ -25,6 +25,11 @@ const routes = [
         component: () => import('pages/ActivitesPage.vue'), // Activités de détente
       },
       {
+        path: '/activites/:id',
+        name: 'activite-detail',
+        component: () => import('pages/ActiviteDetailPage.vue'),
+      },
+      {
         path: 'diagnostique',
         component: () => import('pages/DiagnostiquePage.vue'), // Diagnostique
       },

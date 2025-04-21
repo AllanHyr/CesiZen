@@ -29,12 +29,28 @@
 
         <q-separator class="q-my-md" />
 
+        <!-- Section Pie Chart Répartition des émotions -->
+        <q-card-section>
+          <div class="text-h6 q-mb-md">Répartition des types d'émotions</div>
+
+          <div>
+            <canvas id="emotionPieChart" height="150"></canvas>
+          </div>
+        </q-card-section>
+
+        <q-separator class="q-my-md" />
+
         <!-- Section Activités favorites -->
         <q-card-section>
           <div class="text-h6 q-mb-md">Vos activités favorites</div>
 
           <q-list bordered separator>
-            <q-item v-for="(activite, index) in activitesFavoris" :key="index">
+            <q-item
+              v-for="(activite, index) in activitesFavoris"
+              :key="index"
+              clickable
+              @click="goToActivite(activite.id)"
+            >
               <q-item-section avatar>
                 <q-icon name="spa" color="primary" />
               </q-item-section>
@@ -55,13 +71,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Chart, registerables } from 'chart.js'
 import { useAuthStore } from 'stores/auth'
 
-// Store PINIA
+// Pinia Store pour l'utilisateur connecté
 const auth = useAuthStore()
+const router = useRouter()
+
 const userEmail = ref('')
 
-// Données simulées - Historique émotions
+// Données simulées - Historique des émotions
 const emotionsHistorique = [
   { date: '2025-04-01', emotion: 'Fierté', type: 'Joie' },
   { date: '2025-04-03', emotion: 'Irritation', type: 'Colère' },
@@ -76,7 +96,7 @@ const activitesFavoris = [
   { id: 2, titre: 'Balade en forêt' },
 ]
 
-// Fonction pour récupérer la couleur par type d'émotion
+// Récupérer la couleur selon le type d'émotion
 function emotionColor(type) {
   switch (type) {
     case 'Joie':
@@ -96,7 +116,7 @@ function emotionColor(type) {
   }
 }
 
-// (Optionnel) Fonction pour choisir une icône différente par type
+// Récupérer l'icône selon le type d'émotion
 function emotionIcon(type) {
   switch (type) {
     case 'Joie':
@@ -116,7 +136,45 @@ function emotionIcon(type) {
   }
 }
 
+// Redirection vers une activité spécifique
+function goToActivite(id) {
+  router.push(`/activites/${id}`)
+}
+
+// Charger la page
 onMounted(() => {
   userEmail.value = auth.userEmail
+
+  // Initialiser Chart.js pour le Pie Chart
+  Chart.register(...registerables)
+  const ctxPie = document.getElementById('emotionPieChart').getContext('2d')
+
+  // Compter le nombre d'émotions par type
+  const typeCounts = {}
+  emotionsHistorique.forEach((e) => {
+    typeCounts[e.type] = (typeCounts[e.type] || 0) + 1
+  })
+
+  new Chart(ctxPie, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(typeCounts),
+      datasets: [
+        {
+          label: 'Répartition des émotions',
+          data: Object.values(typeCounts),
+          backgroundColor: Object.keys(typeCounts).map((type) => emotionColor(type)),
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+      },
+    },
+  })
 })
 </script>
