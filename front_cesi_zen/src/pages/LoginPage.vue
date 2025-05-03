@@ -7,14 +7,29 @@
         </q-card-section>
 
         <q-card-section>
-          <q-input filled v-model="email" label="Email" type="email" class="q-mb-md" />
-          <q-input filled v-model="password" label="Mot de passe" type="password" class="q-mb-md" />
+          <q-input
+            filled
+            v-model="email"
+            label="Email"
+            type="email"
+            data-cy="login-email"
+            class="q-mb-md"
+          />
+          <q-input
+            filled
+            v-model="password"
+            label="Mot de passe"
+            type="password"
+            data-cy="login-password"
+            class="q-mb-md"
+          />
         </q-card-section>
 
         <q-card-actions align="around">
           <q-btn
             :label="isRegisterMode ? 'S\'inscrire' : 'Se connecter'"
             color="primary"
+            data-cy="login-validation"
             @click="isRegisterMode ? fakeRegister() : fakeLogin()"
           />
         </q-card-actions>
