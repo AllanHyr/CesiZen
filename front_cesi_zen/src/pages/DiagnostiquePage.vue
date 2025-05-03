@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md flex flex-center">
     <q-card class="q-pa-md">
       <q-card-section>
         <div class="text-h5">Questionnaire Diagnostique</div>
@@ -19,7 +19,12 @@
             class="q-mb-sm col-12 col-md-5 col-sm-12"
           />
 
-          <q-btn label="Valider le questionnaire" color="primary" type="submit" class="q-mt-md" />
+          <q-btn
+            label="Valider le questionnaire"
+            color="primary"
+            type="submit"
+            class="q-mt-md full-width"
+          />
         </q-form>
       </q-card-section>
     </q-card>

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="q-pa-md flex flex-center">
     <q-card class="q-pa-md" style="max-width: 600px; width: 100%">
       <q-card-section>
         <div class="text-h5">Tracker d'Émotions</div>
