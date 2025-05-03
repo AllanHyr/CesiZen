@@ -60,6 +60,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { getBreathingSet, getBreathingPhases } from 'src/utils/breathing'
 
 const selectedPreset = ref(null)
 const started = ref(false)
@@ -92,27 +93,13 @@ function stopBreathing() {
 }
 
 function cycleBreathing() {
-  let breathingSet = { inspiration: 0, apnee: 0, expiration: 0 }
+  const breathingSet = getBreathingSet(selectedPreset.value, {
+    inspiration: customInspiration.value,
+    apnee: customApnee.value,
+    expiration: customExpiration.value,
+  })
 
-  if (selectedPreset.value === '748') {
-    breathingSet = { inspiration: 7, apnee: 4, expiration: 8 }
-  } else if (selectedPreset.value === '55') {
-    breathingSet = { inspiration: 5, apnee: 0, expiration: 5 }
-  } else if (selectedPreset.value === '46') {
-    breathingSet = { inspiration: 4, apnee: 0, expiration: 6 }
-  } else if (selectedPreset.value === 'custom') {
-    breathingSet = {
-      inspiration: customInspiration.value,
-      apnee: customApnee.value,
-      expiration: customExpiration.value,
-    }
-  }
-
-  let phases = [
-    { name: 'Inspirez', duration: breathingSet.inspiration },
-    { name: 'Apnée', duration: breathingSet.apnee },
-    { name: 'Expirez', duration: breathingSet.expiration },
-  ].filter((p) => p.duration > 0)
+  const phases = getBreathingPhases(breathingSet)
 
   let currentPhase = 0
 
