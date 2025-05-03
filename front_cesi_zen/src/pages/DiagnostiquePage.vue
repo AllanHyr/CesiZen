@@ -15,7 +15,7 @@
             :key="event.id"
             v-model="selectedEvents"
             :label="event.label"
-            :val="event.value"
+            :val="event"
             class="q-mb-sm col-12 col-md-5 col-sm-12"
           />
 
@@ -64,7 +64,7 @@ const selectedEvents = ref([])
 
 function submitForm() {
   // Calculer la somme des valeurs sélectionnées
-  const totalScore = calculerScore(selectedEvents.value.map((value) => ({ value })))
+  const totalScore = calculerScore(selectedEvents.value)
 
   // Trouver le résultat correspondant
   const resultat = resultats.find((r) => totalScore >= r.min_value && totalScore <= r.max_value)

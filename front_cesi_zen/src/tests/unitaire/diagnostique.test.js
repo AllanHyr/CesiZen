@@ -8,8 +8,8 @@ describe('Fonction calculerScore', () => {
 
   it('renvoie la somme des valeurs des événements', () => {
     const events = [
-      { label: 'Stress', value: 50 },
-      { label: 'Fatigue', value: 30 },
+      { id: 1, label: 'Stress', value: 50 },
+      { id: 2, label: 'Fatigue', value: 30 },
     ]
     expect(calculerScore(events)).toBe(80)
   })
