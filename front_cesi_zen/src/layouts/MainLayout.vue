@@ -71,9 +71,9 @@ const authStore = useAuthStore() // Utilise le store
 // Liens visibles si non connecté
 const publicLinks = [
   { title: 'Accueil', icon: 'home', to: '/' },
-  { title: 'Respiration', icon: 'self_improvement', to: '/respiration' },
-  { title: 'Activités de détente', icon: 'spa', to: '/activites' },
-  { title: 'Diagnostique', icon: 'assignment', to: '/diagnostique' },
+  { title: 'Respiration', icon: 'spa', to: '/respiration' },
+  { title: 'Activités de détente', icon: 'self_improvement', to: '/activites' },
+  { title: 'Diagnostique', icon: 'psychology', to: '/diagnostique' },
   { title: 'Se connecter', icon: 'login', to: '/login' },
 ]
 
@@ -81,9 +81,9 @@ const publicLinks = [
 const privateLinks = [
   { title: 'Accueil', icon: 'home', to: '/' },
   { title: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
-  { title: 'Respiration', icon: 'self_improvement', to: '/respiration' },
-  { title: 'Activités de détente', icon: 'spa', to: '/activites' },
-  { title: 'Diagnostique', icon: 'assignment', to: '/diagnostique' },
+  { title: 'Respiration', icon: 'spa', to: '/respiration' },
+  { title: 'Activités de détente', icon: 'self_improvement', to: '/activites' },
+  { title: 'Diagnostique', icon: 'psychology', to: '/diagnostique' },
   { title: "Tracker d'émotions", icon: 'favorite', to: '/tracker' },
   { title: 'Se déconnecter', icon: 'logout', to: '#', action: logout }, // Utilise directement la fonction logout
 ]

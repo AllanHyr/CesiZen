@@ -78,7 +78,7 @@
       <div class="col-sm-12 col-md-5">
         <q-card class="shadow-2">
           <q-card-section class="bg-info text-white row items-center">
-            <q-icon name="mood" size="md" class="q-mr-sm" />
+            <q-icon name="self_improvement" size="md" class="q-mr-sm" />
             <div class="text-h6">Activités de détente</div>
           </q-card-section>
           <q-card-section>

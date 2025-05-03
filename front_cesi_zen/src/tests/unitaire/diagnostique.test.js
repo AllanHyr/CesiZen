@@ -1,7 +1,5 @@
 /* eslint-env jest */
-function calculerScore(events) {
-  return events.reduce((acc, event) => acc + (event.value || 0), 0)
-}
+import { calculerScore } from 'src/utils/calculerScore'
 
 describe('Fonction calculerScore', () => {
   it('renvoie 0 pour un tableau vide', () => {

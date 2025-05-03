@@ -11,8 +11,8 @@
       <q-card-section>
         <q-form @submit.prevent="submitForm" class="row">
           <q-checkbox
-            v-for="(event, index) in evenements"
-            :key="index"
+            v-for="event in evenements"
+            :key="event.id"
             v-model="selectedEvents"
             :label="event.label"
             :val="event.value"
@@ -29,17 +29,18 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { calculerScore } from 'src/utils/calculerScore'
 
 const router = useRouter()
 
 // Données simulées JSON pour événements
 const evenements = [
-  { label: 'Décès du conjoint', value: 100 },
-  { label: 'Divorce', value: 73 },
-  { label: 'Séparation', value: 65 },
-  { label: 'Séjour en prison', value: 63 },
-  { label: 'Décès d’un proche parent', value: 63 },
-  { label: 'Maladies ou blessures personnelles', value: 53 },
+  { id: 1, label: 'Décès du conjoint', value: 100 },
+  { id: 2, label: 'Divorce', value: 73 },
+  { id: 3, label: 'Séparation', value: 65 },
+  { id: 4, label: 'Séjour en prison', value: 63 },
+  { id: 5, label: 'Décès d’un proche parent', value: 63 },
+  { id: 6, label: 'Maladies ou blessures personnelles', value: 53 },
   // Ajoute-en d'autres si besoin
 ]
 
@@ -63,7 +64,7 @@ const selectedEvents = ref([])
 
 function submitForm() {
   // Calculer la somme des valeurs sélectionnées
-  const totalScore = selectedEvents.value.reduce((acc, val) => acc + val, 0)
+  const totalScore = calculerScore(selectedEvents.value.map((value) => ({ value })))
 
   // Trouver le résultat correspondant
   const resultat = resultats.find((r) => totalScore >= r.min_value && totalScore <= r.max_value)
