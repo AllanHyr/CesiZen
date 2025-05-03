@@ -1,35 +1,41 @@
 <template>
   <q-page class="q-pa-md flex flex-center">
-    <div style="max-width: 800px; width: 100%">
-      <q-card class="q-pa-md">
-        <!-- Image de l'activité -->
-        <q-img :src="activite?.image || defaultImage" ratio="16/9" class="rounded-borders q-mb-md">
-          <div class="absolute-bottom text-subtitle1 text-white bg-primary q-pa-sm">
-            {{ activite?.titre || 'Activité inconnue' }}
-          </div>
-        </q-img>
+    <transition name="fade-slide" appear>
+      <div style="max-width: 800px; width: 100%">
+        <q-card class="q-pa-md">
+          <!-- Image de l'activité -->
+          <q-img
+            :src="activite?.image || defaultImage"
+            ratio="16/9"
+            class="rounded-borders q-mb-md"
+          >
+            <div class="absolute-bottom text-subtitle1 text-white bg-primary q-pa-sm">
+              {{ activite?.titre || 'Activité inconnue' }}
+            </div>
+          </q-img>
 
-        <!-- Contenu de l'activité -->
-        <q-card-section>
-          <div class="text-h6 q-mb-md">{{ activite?.titre || 'Activité inconnue' }}</div>
+          <!-- Contenu de l'activité -->
+          <q-card-section>
+            <div class="text-h6 q-mb-md">{{ activite?.titre || 'Activité inconnue' }}</div>
 
-          <div class="text-body2 q-mb-md">
-            {{ activite?.description || 'Aucune description disponible pour cette activité.' }}
-          </div>
-        </q-card-section>
+            <div class="text-body2 q-mb-md">
+              {{ activite?.description || 'Aucune description disponible pour cette activité.' }}
+            </div>
+          </q-card-section>
 
-        <!-- Boutons -->
-        <q-card-actions align="center" class="q-mt-md">
-          <q-btn
-            v-if="isLoggedIn"
-            :label="activite?.isFavori ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-            :color="activite?.isFavori ? 'negative' : 'primary'"
-            @click="toggleFavori"
-          />
-          <q-btn label="Retour aux activités" flat @click="goBack" />
-        </q-card-actions>
-      </q-card>
-    </div>
+          <!-- Boutons -->
+          <q-card-actions align="center" class="q-mt-md">
+            <q-btn
+              v-if="isLoggedIn"
+              :label="activite?.isFavori ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+              :color="activite?.isFavori ? 'negative' : 'primary'"
+              @click="toggleFavori"
+            />
+            <q-btn label="Retour aux activités" flat @click="goBack" />
+          </q-card-actions>
+        </q-card>
+      </div>
+    </transition>
   </q-page>
 </template>
 
@@ -110,3 +116,19 @@ function goBack() {
   router.push('/activites')
 }
 </script>
+
+<style scoped>
+/* Animation fade + slide */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.5s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+</style>

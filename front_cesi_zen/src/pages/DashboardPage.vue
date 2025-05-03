@@ -1,87 +1,95 @@
 <template>
   <q-page class="q-pa-md flex flex-center">
-    <div style="max-width: 1200px; width: 100%">
-      <q-card class="q-pa-md">
-        <!-- Titre du Dashboard -->
-        <q-card-section>
-          <div class="text-h5">Tableau de bord</div>
-          <div class="text-subtitle2 q-mt-sm">Bienvenue, {{ userEmail }} !</div>
-        </q-card-section>
-
-        <q-separator class="q-my-md" />
-
-        <!-- Section Historique des émotions -->
-        <q-card-section>
-          <div class="text-h6 q-mb-md">Historique de vos émotions du mois</div>
-
-          <q-list bordered separator>
-            <q-item v-for="(emotion, index) in emotionsHistorique" :key="index">
-              <q-item-section avatar>
-                <q-icon :name="emotionIcon(emotion.type)" :color="emotionColor(emotion.type)" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ emotion.emotion }}</q-item-label>
-                <q-item-label caption>{{ emotion.date }} - {{ emotion.type }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card-section>
-
-        <q-separator class="q-my-md" />
-
-        <!-- Section Pie Chart Répartition des émotions -->
-        <q-card-section>
-          <div class="text-h6 q-mb-md">Répartition des types d'émotions</div>
-
-          <div>
-            <canvas id="emotionPieChart" height="150"></canvas>
-          </div>
-        </q-card-section>
-
-        <q-separator class="q-my-md" />
-
-        <!-- Section Activités favorites -->
-        <q-card-section>
-          <div class="text-h6 q-mb-md">Vos activités favorites</div>
-
-          <q-list bordered separator>
-            <q-item
-              v-for="(activite, index) in activitesFavoris"
-              :key="index"
-              clickable
-              @click="goToActivite(activite.id)"
-            >
-              <q-item-section avatar>
-                <q-icon name="spa" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ activite.titre }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card-section>
-
-        <q-card-actions align="center" class="q-mt-md">
-          <q-btn label="Retour accueil" color="primary" to="/" />
-        </q-card-actions>
-      </q-card>
+    <div v-if="isLoading" class="flex flex-center">
+      <q-spinner size="50px" color="primary" />
     </div>
+
+    <transition name="fade-slide" appear v-else>
+      <div style="max-width: 1200px; width: 100%">
+        <q-card class="q-pa-md">
+          <!-- Titre Dashboard -->
+          <q-card-section>
+            <div class="text-h5">Tableau de bord</div>
+            <div class="text-subtitle2 q-mt-sm">Bienvenue, {{ userEmail }} !</div>
+          </q-card-section>
+
+          <q-separator class="q-my-md" />
+
+          <!-- Historique des émotions -->
+          <q-card-section>
+            <div class="text-h6 q-mb-md">Historique de vos émotions du mois</div>
+
+            <q-list bordered separator>
+              <q-item v-for="(emotion, index) in emotionsHistorique" :key="index">
+                <q-item-section avatar>
+                  <q-icon :name="emotionIcon(emotion.type)" :color="emotionColor(emotion.type)" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ emotion.emotion }}</q-item-label>
+                  <q-item-label caption>{{ emotion.date }} - {{ emotion.type }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-separator class="q-my-md" />
+
+          <!-- Section Pie Chart -->
+          <q-card-section>
+            <div class="text-h6 q-mb-md">Répartition des types d'émotions</div>
+
+            <div class="flex flex-center">
+              <div style="width: 250px; height: 250px">
+                <canvas id="emotionPieChart"></canvas>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-separator class="q-my-md" />
+
+          <!-- Activités favorites -->
+          <q-card-section>
+            <div class="text-h6 q-mb-md">Vos activités favorites</div>
+
+            <q-list bordered separator>
+              <q-item
+                v-for="(activite, index) in activitesFavoris"
+                :key="index"
+                clickable
+                @click="goToActivite(activite.id)"
+              >
+                <q-item-section avatar>
+                  <q-icon name="spa" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ activite.titre }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-card-actions align="center" class="q-mt-md">
+            <q-btn label="Retour accueil" color="primary" to="/" />
+          </q-card-actions>
+        </q-card>
+      </div>
+    </transition>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Chart, registerables } from 'chart.js'
 import { useAuthStore } from 'stores/auth'
 
-// Pinia Store pour l'utilisateur connecté
 const auth = useAuthStore()
 const router = useRouter()
 
 const userEmail = ref('')
+const isLoading = ref(true)
+let chartInstance = null
 
-// Données simulées - Historique des émotions
 const emotionsHistorique = [
   { date: '2025-04-01', emotion: 'Fierté', type: 'Joie' },
   { date: '2025-04-03', emotion: 'Irritation', type: 'Colère' },
@@ -90,13 +98,11 @@ const emotionsHistorique = [
   { date: '2025-04-10', emotion: 'Étonnement', type: 'Surprise' },
 ]
 
-// Données simulées - Activités favorites
 const activitesFavoris = [
   { id: 1, titre: 'Méditation guidée' },
   { id: 2, titre: 'Balade en forêt' },
 ]
 
-// Récupérer la couleur selon le type d'émotion
 function emotionColor(type) {
   switch (type) {
     case 'Joie':
@@ -116,7 +122,6 @@ function emotionColor(type) {
   }
 }
 
-// Récupérer l'icône selon le type d'émotion
 function emotionIcon(type) {
   switch (type) {
     case 'Joie':
@@ -136,45 +141,77 @@ function emotionIcon(type) {
   }
 }
 
-// Redirection vers une activité spécifique
 function goToActivite(id) {
   router.push(`/activites/${id}`)
 }
 
-// Charger la page
-onMounted(() => {
-  userEmail.value = auth.userEmail
+function initPieChart() {
+  const ctxPie = document.getElementById('emotionPieChart')?.getContext('2d')
+  if (!ctxPie) return
 
-  // Initialiser Chart.js pour le Pie Chart
-  Chart.register(...registerables)
-  const ctxPie = document.getElementById('emotionPieChart').getContext('2d')
+  // Détruire l'ancien graphique si besoin
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
 
-  // Compter le nombre d'émotions par type
   const typeCounts = {}
   emotionsHistorique.forEach((e) => {
     typeCounts[e.type] = (typeCounts[e.type] || 0) + 1
   })
 
-  new Chart(ctxPie, {
+  chartInstance = new Chart(ctxPie, {
     type: 'pie',
     data: {
       labels: Object.keys(typeCounts),
       datasets: [
         {
-          label: 'Répartition des émotions',
           data: Object.values(typeCounts),
-          backgroundColor: Object.keys(typeCounts).map((type) => emotionColor(type)),
+          backgroundColor: [
+            '#A2D2FF', // Bleu pastel
+            '#FFC8DD', // Rose pastel
+            '#CDB4DB', // Mauve pastel
+            '#FFAFCC', // Rose clair
+            '#B5EAD7', // Vert pastel
+            '#E2F0CB', // Vert clair
+          ],
         },
       ],
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom',
-        },
+        legend: { position: 'bottom' },
       },
     },
   })
+}
+
+onMounted(() => {
+  userEmail.value = auth.userEmail
+
+  Chart.register(...registerables)
+
+  setTimeout(async () => {
+    isLoading.value = false
+
+    await nextTick()
+    initPieChart()
+  }, 500)
 })
 </script>
+
+<style scoped>
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.5s ease;
+}
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+</style>

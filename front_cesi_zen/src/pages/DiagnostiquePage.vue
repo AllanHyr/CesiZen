@@ -9,14 +9,14 @@
       <q-separator />
 
       <q-card-section>
-        <q-form @submit.prevent="submitForm">
+        <q-form @submit.prevent="submitForm" class="row">
           <q-checkbox
             v-for="(event, index) in evenements"
             :key="index"
             v-model="selectedEvents"
             :label="event.label"
             :val="event.value"
-            class="q-mb-sm"
+            class="q-mb-sm col-12 col-md-5 col-sm-12"
           />
 
           <q-btn label="Valider le questionnaire" color="primary" type="submit" class="q-mt-md" />

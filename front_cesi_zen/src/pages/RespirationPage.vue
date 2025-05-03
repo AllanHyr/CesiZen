@@ -1,8 +1,7 @@
 <template>
   <q-page class="q-pa-md flex flex-center">
-    <div style="max-width: 600px; width: 100%;">
+    <div style="max-width: 600px; width: 100%">
       <q-card>
-
         <q-card-section>
           <div class="text-h5">Exercice de Respiration - Cohérence Cardiaque</div>
           <div class="text-caption q-mt-sm">Sélectionnez un exercice ou créez le vôtre.</div>
@@ -19,12 +18,27 @@
           />
 
           <div v-if="selectedPreset === 'custom'" class="q-gutter-md">
-            <q-input filled v-model.number="customInspiration" label="Inspiration (secondes)" type="number" />
+            <q-input
+              filled
+              v-model.number="customInspiration"
+              label="Inspiration (secondes)"
+              type="number"
+            />
             <q-input filled v-model.number="customApnee" label="Apnée (secondes)" type="number" />
-            <q-input filled v-model.number="customExpiration" label="Expiration (secondes)" type="number" />
+            <q-input
+              filled
+              v-model.number="customExpiration"
+              label="Expiration (secondes)"
+              type="number"
+            />
           </div>
 
-          <q-btn label="Démarrer" color="primary" class="q-mt-md full-width" @click="startBreathing" />
+          <q-btn
+            label="Démarrer"
+            color="primary"
+            class="q-mt-md full-width"
+            @click="startBreathing"
+          />
         </q-card-section>
 
         <q-separator />
@@ -32,9 +46,13 @@
         <q-card-section v-if="started">
           <div class="text-h6 text-center">{{ phase }}</div>
           <div class="text-h4 text-center q-mt-md">{{ timer }}s</div>
-          <q-btn label="Arrêter" color="negative" class="q-mt-md full-width" @click="stopBreathing" />
+          <q-btn
+            label="Arrêter"
+            color="negative"
+            class="q-mt-md full-width"
+            @click="stopBreathing"
+          />
         </q-card-section>
-
       </q-card>
     </div>
   </q-page>
@@ -58,7 +76,7 @@ const presets = [
   { label: 'Exercice 748 (7-4-8)', value: '748' },
   { label: 'Exercice 55 (5-0-5)', value: '55' },
   { label: 'Exercice 46 (4-0-6)', value: '46' },
-  { label: 'Personnalisé', value: 'custom' }
+  { label: 'Personnalisé', value: 'custom' },
 ]
 
 function startBreathing() {
@@ -86,15 +104,15 @@ function cycleBreathing() {
     breathingSet = {
       inspiration: customInspiration.value,
       apnee: customApnee.value,
-      expiration: customExpiration.value
+      expiration: customExpiration.value,
     }
   }
 
   let phases = [
     { name: 'Inspirez', duration: breathingSet.inspiration },
     { name: 'Apnée', duration: breathingSet.apnee },
-    { name: 'Expirez', duration: breathingSet.expiration }
-  ].filter(p => p.duration > 0)
+    { name: 'Expirez', duration: breathingSet.expiration },
+  ].filter((p) => p.duration > 0)
 
   let currentPhase = 0
 
