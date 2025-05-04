@@ -11,7 +11,7 @@
       <q-card-section>
         <q-form @submit.prevent="submitForm" class="row">
           <q-checkbox
-            v-for="event in evenements"
+            v-for="event in events"
             :key="event.id"
             v-model="selectedEvents"
             :label="event.label"
@@ -34,48 +34,25 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useEventStore } from 'src/stores/eventStore'
+import { useResultStore } from 'src/stores/resultStore'
+import { storeToRefs } from 'pinia'
 import { calculerScore } from 'src/utils/calculerScore'
 
 const router = useRouter()
 
-// Données simulées JSON pour événements
-const evenements = [
-  { id: 1, label: 'Décès du conjoint', value: 100 },
-  { id: 2, label: 'Divorce', value: 73 },
-  { id: 3, label: 'Séparation', value: 65 },
-  { id: 4, label: 'Séjour en prison', value: 63 },
-  { id: 5, label: 'Décès d’un proche parent', value: 63 },
-  { id: 6, label: 'Maladies ou blessures personnelles', value: 53 },
-  // Ajoute-en d'autres si besoin
-]
+const eventStore = useEventStore()
+const { events } = storeToRefs(eventStore)
 
-// Données simulées JSON pour résultats
-const resultats = [
-  { text: 'Stress faible – Votre niveau de stress est maîtrisé.', min_value: 0, max_value: 149 },
-  {
-    text: 'Stress modéré – Votre stress commence à impacter votre bien-être.',
-    min_value: 150,
-    max_value: 199,
-  },
-  {
-    text: 'Stress élevé – Votre niveau de stress est préoccupant.',
-    min_value: 200,
-    max_value: 299,
-  },
-  { text: 'Stress très élevé – Votre stress est critique.', min_value: 300, max_value: 600 },
-]
+const resultStore = useResultStore()
 
 const selectedEvents = ref([])
 
 function submitForm() {
-  // Calculer la somme des valeurs sélectionnées
   const totalScore = calculerScore(selectedEvents.value)
-
-  // Trouver le résultat correspondant
-  const resultat = resultats.find((r) => totalScore >= r.min_value && totalScore <= r.max_value)
+  const resultat = resultStore.getResultByScore(totalScore)
 
   if (resultat) {
-    // Rediriger vers la page de résultat en passant l'objet resultat
     router.push({
       name: 'resultat-diagnostique',
       query: { text: resultat.text, score: totalScore },

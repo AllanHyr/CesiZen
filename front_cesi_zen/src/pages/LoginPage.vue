@@ -1,47 +1,50 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center bg-grey-2">
     <div class="q-pa-md" style="max-width: 400px; width: 100%">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">{{ isRegisterMode ? 'Créer un compte' : 'Connexion' }}</div>
+      <q-card bordered>
+        <q-card-section class="bg-primary text-white q-py-md">
+          <div class="text-h5 text-center">
+            {{ isRegisterMode ? 'Créer un compte' : 'Connexion' }}
+          </div>
         </q-card-section>
 
-        <q-card-section>
-          <q-input
-            filled
-            v-model="email"
-            label="Email"
-            type="email"
-            data-cy="login-email"
-            class="q-mb-md"
-          />
+        <q-card-section class="q-gutter-md">
+          <q-input filled v-model="email" label="Email" type="email" data-cy="login-email" />
           <q-input
             filled
             v-model="password"
             label="Mot de passe"
             type="password"
             data-cy="login-password"
-            class="q-mb-md"
+          />
+          <q-checkbox
+            v-if="isRegisterMode"
+            v-model="isAdminRegistration"
+            label="Créer un compte administrateur (développement)"
+            class="q-mt-sm"
           />
         </q-card-section>
 
-        <q-card-actions align="around">
+        <q-card-actions align="around" class="q-pa-md">
           <q-btn
             :label="isRegisterMode ? 'S\'inscrire' : 'Se connecter'"
             color="primary"
             data-cy="login-validation"
-            @click="isRegisterMode ? fakeRegister() : fakeLogin()"
+            @click="isRegisterMode ? register() : login()"
+            :loading="loading"
+            class="full-width"
           />
         </q-card-actions>
 
-        <q-card-section class="text-center">
+        <q-card-section class="text-center q-pa-sm">
           <q-btn
             flat
-            color="primary"
+            color="grey-7"
             :label="
-              isRegisterMode ? 'Déjà inscrit ? Se connecter' : 'Pas de compte ? Créer un compte'
+              isRegisterMode ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? Créer un compte'
             "
-            @click="isRegisterMode = !isRegisterMode"
+            @click="toggleRegisterMode"
+            size="sm"
           />
         </q-card-section>
       </q-card>
@@ -52,52 +55,101 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from 'src/stores/auth' // Importe le store
-
-// Simulation JSON de "base de données" locale
-const fakeUsers = ref([
-  { email: 'admin@cesizen.fr', password: 'admin123' },
-  { email: 'test@cesizen.fr', password: 'test123' },
-])
+import { useAuthStore } from 'src/stores/auth'
+import { useQuasar } from 'quasar'
 
 const email = ref('')
 const password = ref('')
 const isRegisterMode = ref(false)
+const isAdminRegistration = ref(false) // Pour l'option (de développement) d'administrateur à l'inscription
+const loading = ref(false)
 const router = useRouter()
-const authStore = useAuthStore() // Utilise le store
+const authStore = useAuthStore()
+const $q = useQuasar()
 
-async function fakeLogin() {
-  if (!email.value || !password.value) {
-    alert('Veuillez remplir tous les champs.')
-    return
-  }
-
-  // Simulation d'un appel API
-  const user = fakeUsers.value.find((u) => u.email === email.value && u.password === password.value)
-
-  if (user) {
-    authStore.login(user) // Utilise l'action du store pour la connexion
-    router.push('/dashboard')
-  } else {
-    alert('Email ou mot de passe incorrect.')
-  }
+function toggleRegisterMode() {
+  isRegisterMode.value = !isRegisterMode.value
+  // Réinitialiser le champ admin lors du changement de mode
+  isAdminRegistration.value = false
 }
 
-async function fakeRegister() {
+async function login() {
   if (!email.value || !password.value) {
-    alert('Veuillez remplir tous les champs.')
+    $q.notify({
+      type: 'warning',
+      message: 'Veuillez remplir tous les champs.',
+      position: 'top-right',
+    })
     return
   }
 
-  const userExists = fakeUsers.value.find((u) => u.email === email.value)
+  loading.value = true
+  const user = authStore.findUser(email.value, password.value)
 
+  setTimeout(() => {
+    // Simulation d'un délai d'authentification
+    loading.value = false
+    if (user) {
+      authStore.login(user)
+      router.push('/dashboard') // Redirigez vers le dashboard après la connexion
+      $q.notify({
+        type: 'positive',
+        message: 'Connexion réussie !',
+        position: 'top-right',
+      })
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Email ou mot de passe incorrect.',
+        position: 'top-right',
+      })
+    }
+  }, 1000)
+}
+
+async function register() {
+  if (!email.value || !password.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Veuillez remplir tous les champs.',
+      position: 'top-right',
+    })
+    return
+  }
+
+  // Vérification si l'utilisateur existe déjà (optionnel, peut être géré côté serveur dans une vraie application)
+  const userExists = authStore.users.find((u) => u.email === email.value)
   if (userExists) {
-    alert('Un compte avec cet email existe déjà.')
+    $q.notify({
+      type: 'warning',
+      message: 'Un compte avec cet email existe déjà.',
+      position: 'top-right',
+    })
     return
   }
 
-  fakeUsers.value.push({ email: email.value, password: password.value })
-  alert('Compte créé ! Vous pouvez maintenant vous connecter.')
-  isRegisterMode.value = false
+  loading.value = true
+  setTimeout(() => {
+    // Simulation d'un délai d'enregistrement
+    const newUser = {
+      id: Date.now(), // Générer un ID simple pour l'exemple
+      email: email.value,
+      password: password.value,
+      fk_role: isAdminRegistration.value ? 1 : 2, // Définit le rôle selon la case à cocher
+    }
+
+    authStore.registerUser(newUser)
+    loading.value = false
+    $q.notify({
+      type: 'positive',
+      message: 'Compte créé avec succès ! Vous pouvez vous connecter.',
+      position: 'top-right',
+    })
+    isRegisterMode.value = false // Retourner au mode connexion après l'inscription
+  }, 1000)
 }
 </script>
+
+<style scoped>
+/* Styles spécifiques au composant si nécessaire */
+</style>

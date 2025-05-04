@@ -60,36 +60,46 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { useAuthStore } from 'src/stores/auth' // Importe le store
+import { useAuthStore } from 'src/stores/auth'
 
 const leftDrawerOpen = ref(false)
 const router = useRouter()
 const $q = useQuasar()
 const confirmLogout = ref(false)
-const authStore = useAuthStore() // Utilise le store
+const authStore = useAuthStore()
 
-// Liens visibles si non connecté
-const publicLinks = [
+const isAdmin = computed(() => authStore.isAdmin)
+const isLoggedIn = computed(() => authStore.isLoggedInGetter)
+
+const publicLinks = ref([
   { title: 'Accueil', icon: 'home', to: '/' },
   { title: 'Respiration', icon: 'spa', to: '/respiration' },
   { title: 'Activités de détente', icon: 'self_improvement', to: '/activites' },
   { title: 'Diagnostique', icon: 'psychology', to: '/diagnostique' },
   { title: 'Se connecter', icon: 'login', to: '/login' },
-]
+])
 
-// Liens visibles si connecté
-const privateLinks = [
+const basePrivateLinks = ref([
   { title: 'Accueil', icon: 'home', to: '/' },
   { title: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
   { title: 'Respiration', icon: 'spa', to: '/respiration' },
   { title: 'Activités de détente', icon: 'self_improvement', to: '/activites' },
   { title: 'Diagnostique', icon: 'psychology', to: '/diagnostique' },
   { title: "Tracker d'émotions", icon: 'favorite', to: '/tracker' },
-  { title: 'Se déconnecter', icon: 'logout', to: '#', action: logout }, // Utilise directement la fonction logout
-]
+  { title: 'Se déconnecter', icon: 'logout', action: () => (confirmLogout.value = true) },
+])
 
-// Liens affichés selon connexion
-const availableLinks = computed(() => (authStore.isLoggedIn ? privateLinks : publicLinks))
+const privateLinksWithAdmin = computed(() => {
+  const links = [...basePrivateLinks.value]
+  if (isAdmin.value) {
+    links.push({ title: 'Admin', icon: 'admin_panel_settings', to: '/admin' })
+  }
+  return links
+})
+
+const availableLinks = computed(() =>
+  isLoggedIn.value ? privateLinksWithAdmin.value : publicLinks.value,
+)
 
 // Gestion de clic sur un lien
 function handleLink(link) {

@@ -38,6 +38,11 @@ const routes = [
         name: 'resultat-diagnostique',
         component: () => import('pages/ResultatDiagnostiquePage.vue'),
       },
+      {
+        path: 'admin',
+        component: () => import('pages/AdminPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
     ],
   },
 
