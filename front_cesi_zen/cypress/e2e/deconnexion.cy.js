@@ -21,6 +21,8 @@ describe('Connexion utilisateur', () => {
     cy.get('button[aria-label="Menu"]').click()
     cy.contains('Se déconnecter').click()
 
+    cy.get('[data-cy=logout-validation]').click()
+
     cy.url().should('include', '/login')
   })
 })

@@ -15,7 +15,6 @@ describe('Connexion utilisateur', () => {
 
     // Soumission
     cy.get('[data-cy=login-validation]').click()
-    cy.get('[data-cy=login-validation]').click()
 
     // Vérifications
     cy.url().should('include', '/dashboard')

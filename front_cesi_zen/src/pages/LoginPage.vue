@@ -117,7 +117,6 @@ async function register() {
     return
   }
 
-  // Vérification si l'utilisateur existe déjà (optionnel, peut être géré côté serveur dans une vraie application)
   const userExists = authStore.users.find((u) => u.email === email.value)
   if (userExists) {
     $q.notify({
@@ -129,24 +128,26 @@ async function register() {
   }
 
   loading.value = true
-  setTimeout(() => {
-    // Simulation d'un délai d'enregistrement
-    const newUser = {
-      id: Date.now(), // Générer un ID simple pour l'exemple
-      email: email.value,
-      password: password.value,
-      fk_role: isAdminRegistration.value ? 1 : 2, // Définit le rôle selon la case à cocher
-    }
 
-    authStore.registerUser(newUser)
-    loading.value = false
-    $q.notify({
-      type: 'positive',
-      message: 'Compte créé avec succès ! Vous pouvez vous connecter.',
-      position: 'top-right',
-    })
-    isRegisterMode.value = false // Retourner au mode connexion après l'inscription
-  }, 1000)
+  const newUser = {
+    id: Date.now(),
+    email: email.value,
+    password: password.value,
+    role: isAdminRegistration.value ? 1 : 2,
+  }
+
+  authStore.registerUser(newUser)
+  authStore.login(newUser) // Connexion directe
+
+  loading.value = false
+
+  $q.notify({
+    type: 'positive',
+    message: 'Compte créé et connecté avec succès !',
+    position: 'top-right',
+  })
+
+  router.push('/dashboard') // Redirection vers le dashboard
 }
 </script>
 

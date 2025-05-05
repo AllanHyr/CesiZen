@@ -49,7 +49,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Annuler" color="grey" v-close-popup />
-          <q-btn flat label="Se déconnecter" color="primary" @click="logoutConfirmed" />
+          <q-btn data-cy="logout-validation" flat label="Se déconnecter" color="primary" @click="logoutConfirmed" />
         </q-card-actions>
       </q-card>
     </q-dialog>
