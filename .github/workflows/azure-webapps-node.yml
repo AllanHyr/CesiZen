@@ -1,0 +1,40 @@
+name: Deploy Quasar Front
+
+on:
+  push:
+    branches:
+      - main  # Déclenchement sur push dans main, adapte selon ta branche
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    container:
+      image: node:20  # ou node:24 si tu préfères
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          cd front_cesi_zen
+          npm install
+
+      - name: Build Quasar project
+        run: |
+          cd front_cesi_zen
+          npm run build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+          ssh-keyscan -p 22 192.168.10.182 >> ~/.ssh/known_hosts
+        env:
+          PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
+
+      - name: Deploy Quasar dist to server
+        run: |
+          scp -r front_cesi_zen/dist/spa/* hyrise@192.168.10.182:/var/www/html
