@@ -8,35 +8,43 @@ on:
 jobs:
   build-and-deploy:
     runs-on: self-hosted
+
     container:
-      image: node:20  # Utilise un conteneur avec Node.js préinstallé
+      image: node:20
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build frontend (Quasar)
+      - name: Install dependencies
         run: |
           cd front_cesi_zen
           npm install
+
+      - name: Build Quasar project
+        run: |
+          cd front_cesi_zen
           npm run build
 
-      - name: Setup SSH for deploy
+      - name: Setup SSH keys and config
         run: |
           mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-          chmod 600 ~/.ssh/config
+          # Nettoyer une ancienne clé du serveur dans known_hosts
+          ssh-keygen -R 192.168.10.196 || true
 
-          ssh-keyscan -p 22 192.168.10.196 >> ~/.ssh/known_hosts
+          # Ajouter la clé SSH du serveur dans known_hosts
+          ssh-keyscan -H 192.168.10.196 >> ~/.ssh/known_hosts
+
+          # Config SSH permissive pour éviter les erreurs host key checking
+          echo -e "Host 192.168.10.196\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
+          chmod 600 ~/.ssh/config
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
 
-      - name: Deploy frontend via SCP
+      - name: Deploy front
         run: |
           scp -i ~/.ssh/id_ed25519 -r front_cesi_zen/dist/spa/* hyrise@192.168.10.196:/var/www/html
           ssh -i ~/.ssh/id_ed25519 hyrise@192.168.10.196 'echo "✅ Déploiement terminé."'
