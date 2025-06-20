@@ -3,13 +3,11 @@ name: Deploy Quasar Front
 on:
   push:
     branches:
-      - main  # Déclenchement sur push dans main, adapte selon ta branche
+      - main  # Déclenchement sur push dans main
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
-    container:
-      image: node:20  # ou node:24 si tu préfères
+    runs-on: self-hosted  # On utilise ton runner distant directement, sans conteneur
 
     steps:
       - name: Checkout code
@@ -19,30 +17,28 @@ jobs:
         run: |
           cd front_cesi_zen
           npm install
+
       - name: Build Quasar project
         run: |
           cd front_cesi_zen
           npm run build
-          
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-      
-          # Ajouter la clé du serveur distant dans known_hosts
+
+          # Ajouter l'empreinte SSH du serveur distant
           ssh-keyscan -H 192.168.10.196 >> ~/.ssh/known_hosts
-      
-          # Config SSH permissive (évite l'erreur HostKey)
+
+          # Désactiver la vérification stricte (utile pour CI/CD)
           echo -e "Host 192.168.10.196\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
-      
           chmod 600 ~/.ssh/config
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
 
-
-      
       - name: Deploy front
         run: |
-          scp -i ~/.ssh/id_ed25519 -r front/dist/spa/* hyrise@192.168.10.196:/var/www/html
+          scp -i ~/.ssh/id_ed25519 -r front_cesi_zen/dist/spa/* hyrise@192.168.10.196:/var/www/html
           ssh -i ~/.ssh/id_ed25519 hyrise@192.168.10.196 'echo "✅ Déploiement terminé."'
