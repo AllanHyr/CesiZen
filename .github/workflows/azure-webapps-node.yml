@@ -28,18 +28,11 @@ jobs:
 
       - name: Setup SSH
         run: |
+          eval $(ssh-agent -s)
+          echo "$PRIVATE_DEPLOY_KEY" | tr -d '\r' | ssh-add -
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-
-          echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-          # Ajouter la clé du serveur pour éviter "Host key verification failed"
-          ssh-keyscan -H 192.168.10.196 >> ~/.ssh/known_hosts
-
-          # (Optionnel) Ajouter une config permissive
-          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-          chmod 600 ~/.ssh/config
+          ssh-keyscan -H 192.168.10.196 2>/dev/null >> ~/.ssh/known_hosts
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
 
