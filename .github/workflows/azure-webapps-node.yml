@@ -24,17 +24,18 @@ jobs:
         run: |
           cd front_cesi_zen
           npm run build
-
+          
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
           ssh-keyscan -p 22 192.168.10.196 >> ~/.ssh/known_hosts
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
-
-      - name: Deploy Quasar dist to server
+      
+      - name: Deploy front
         run: |
-          scp -r front_cesi_zen/dist/spa/* hyrise@192.168.10.196:/var/www/html
+          scp -i ~/.ssh/id_ed25519 -r front/dist/spa/* hyrise@192.168.10.196:/var/www/html
+          ssh -i ~/.ssh/id_ed25519 hyrise@192.168.10.196 'echo "✅ Déploiement terminé."'
