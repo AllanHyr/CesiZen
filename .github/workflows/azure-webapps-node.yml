@@ -26,20 +26,19 @@ jobs:
           cd front_cesi_zen
           npm run build
 
-      - name: Setup SSH keys and config
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Nettoyer une ancienne clé du serveur dans known_hosts
-          ssh-keygen -R 192.168.10.196 || true
-
-          # Ajouter la clé SSH du serveur dans known_hosts
+          # Ajouter la clé du serveur pour éviter "Host key verification failed"
           ssh-keyscan -H 192.168.10.196 >> ~/.ssh/known_hosts
 
-          # Config SSH permissive pour éviter les erreurs host key checking
-          echo -e "Host 192.168.10.196\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > ~/.ssh/config
+          # (Optionnel) Ajouter une config permissive
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
           chmod 600 ~/.ssh/config
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
