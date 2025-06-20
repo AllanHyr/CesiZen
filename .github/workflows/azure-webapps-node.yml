@@ -27,6 +27,8 @@ jobs:
           
       - name: Setup SSH
         run: |
+          set -x  # Affiche chaque commande
+          set -e  # Stoppe en cas d'erreur
           mkdir -p ~/.ssh
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
@@ -34,6 +36,7 @@ jobs:
           ssh-keyscan -p 22 192.168.10.196 >> ~/.ssh/known_hosts
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
+
       
       - name: Deploy front
         run: |
