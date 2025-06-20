@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: node:20  # ou node:24 si tu préfères
 
@@ -39,6 +39,7 @@ jobs:
 
       
       - name: Deploy front
+        runs-on: self-hosted
         run: |
           scp -i ~/.ssh/id_ed25519 -r front/dist/spa/* hyrise@192.168.10.196:/var/www/html
           ssh -i ~/.ssh/id_ed25519 hyrise@192.168.10.196 'echo "✅ Déploiement terminé."'
