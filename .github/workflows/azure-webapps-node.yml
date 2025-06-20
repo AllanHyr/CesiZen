@@ -31,10 +31,10 @@ jobs:
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-          ssh-keyscan -p 22 192.168.10.182 >> ~/.ssh/known_hosts
+          ssh-keyscan -p 22 192.168.10.196 >> ~/.ssh/known_hosts
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
 
       - name: Deploy Quasar dist to server
         run: |
-          scp -r front_cesi_zen/dist/spa/* hyrise@192.168.10.182:/var/www/html
+          scp -r front_cesi_zen/dist/spa/* hyrise@192.168.10.196:/var/www/html
