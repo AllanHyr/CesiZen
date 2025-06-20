@@ -10,10 +10,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Fix workspace permissions
-        run: |
-          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -28,15 +24,12 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # Ajoute la clé privée de déploiement
           echo "$PRIVATE_DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-          # Désactive le strict host key checking
           echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
           chmod 600 ~/.ssh/config
 
-          # Ajoute l'hôte à known_hosts
           ssh-keyscan -p 22 192.168.10.196 >> ~/.ssh/known_hosts
         env:
           PRIVATE_DEPLOY_KEY: ${{ secrets.PRIVATE_DEPLOY_KEY }}
