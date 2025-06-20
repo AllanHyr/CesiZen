@@ -8,6 +8,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: self-hosted
+    container:
+      image: node:20  # Utilise un conteneur avec Node.js préinstallé
 
     steps:
       - name: Checkout code
